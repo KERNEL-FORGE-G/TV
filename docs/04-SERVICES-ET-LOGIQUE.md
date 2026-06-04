@@ -82,19 +82,21 @@ IDs d’applications pour raccourcis streaming Roku.
 ### `NetworkDiscoveryService.ts`
 
 - Génère hôtes `/24` via `subnetHosts` (`utils/network.ts`).
-- **`mapPool`** : jusqu’à 56 sondes parallèles, timeout ~420 ms.
-- **`probeHost`** : Roku, Samsung, LG, Sony, Philips en parallèle par IP.
+- Scan par **vagues** (36 IP, pause 700 ms), **14** sondes parallèles max, timeout ~420 ms.
+- **`probeHost`** : Roku, Samsung, LG, Sony, Philips — une IP = une TV reconnue ou rien.
 - Support **`AbortSignal`** pour arrêt utilisateur.
 
 ### `DiscoveryManager.ts`
 
-- `scanDiscoveryCandidates(subnet, options)` — boucle **45 s**, passes multiples, déduplication par `host`.
+- `scanDiscoveryCandidates(subnet, options)` — fenêtre **45 s**, max **2 passes** /24, throttle UI.
 - `adoptCandidate(candidate, roomId?)` → `Partial<Device>` pour `addDevice`.
 
 ### `scanSession.ts`
 
-- `SCAN_DURATION_MS = 45_000`
-- `DiscoveryScanOptions`, `reportScanProgress`, `waitUntilScanDeadline`
+- `SCAN_DURATION_MS = 45_000`, `SCAN_MAX_FULL_PASSES = 2`
+- `createThrottledScanProgress`, `sleepScan`, `DiscoveryScanOptions`
+
+**Guide utilisateur détaillé :** [07-DECOUVERTE-SCAN.md](./07-DECOUVERTE-SCAN.md) (Wi‑Fi = TV connues uniquement, BT ≠ TV seulement, crash ~25 s).
 
 ### `availability.ts`
 

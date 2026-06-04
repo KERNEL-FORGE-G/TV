@@ -8,8 +8,9 @@ Documentation en français, de A à Z, pour comprendre le **but**, le **fonction
 2. **[02-INTERFACES-ET-TYPES.md](./02-INTERFACES-ET-TYPES.md)** — Contrats TypeScript (`Device`, `DiscoveryCandidate`, routes, etc.).
 3. **[03-ECRANS-ET-COMPOSANTS.md](./03-ECRANS-ET-COMPOSANTS.md)** — Ce que voit l’utilisateur : onglets, modales, scan « orbite ».
 4. **[04-SERVICES-ET-LOGIQUE.md](./04-SERVICES-ET-LOGIQUE.md)** — Logique métier : scan 45 s, IR, Smart TV, BLE, export.
-5. **[05-REFERENCE-FICHIERS.md](./05-REFERENCE-FICHIERS.md)** — Table exhaustive fichier par fichier.
-6. **[06-DEVELOPPEMENT.md](./06-DEVELOPPEMENT.md)** — Commandes npm, build, dépannage.
+5. **[07-DECOUVERTE-SCAN.md](./07-DECOUVERTE-SCAN.md)** — Scan Wi‑Fi / Bluetooth : TV uniquement ?, stabilité, 45 s.
+6. **[05-REFERENCE-FICHIERS.md](./05-REFERENCE-FICHIERS.md)** — Table exhaustive fichier par fichier.
+7. **[06-DEVELOPPEMENT.md](./06-DEVELOPPEMENT.md)** — Commandes npm, build, dépannage.
 
 ## Public cible
 

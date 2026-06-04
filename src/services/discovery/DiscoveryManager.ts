@@ -2,10 +2,13 @@ import type { DiscoveryCandidate, TransportRoute } from '../../core/remoteTypes'
 import { discoverTvsOnNetwork } from '../NetworkDiscoveryService';
 import { resolveSubnetPrefixes } from '../../utils/network';
 import {
+  createThrottledScanProgress,
   isScanAborted,
   normalizeScanOptions,
   reportScanProgress,
   SCAN_DURATION_MS,
+  SCAN_MAX_FULL_PASSES,
+  sleepScan,
   waitUntilScanDeadline,
   type DiscoveryScanOptions,
 } from './scanSession';
@@ -38,15 +41,19 @@ export async function scanDiscoveryCandidates(
   options?: DiscoveryScanOptions | ((pct: number) => void),
 ): Promise<DiscoveryCandidate[]> {
   const { signal, onProgress } = normalizeScanOptions(options);
+  const emitProgress = createThrottledScanProgress(450, onProgress);
   const prefixes = await resolveSubnetPrefixes(subnet);
   const seenHosts = new Set<string>();
   const candidates: DiscoveryCandidate[] = [];
   const startMs = Date.now();
   let pass = 0;
 
-  while (!waitUntilScanDeadline(startMs, signal)) {
+  while (
+    !waitUntilScanDeadline(startMs, signal) &&
+    pass < SCAN_MAX_FULL_PASSES
+  ) {
     pass += 1;
-    reportScanProgress(startMs, onProgress, `passe ${pass}`);
+    reportScanProgress(startMs, emitProgress, `passe ${pass}`);
 
     for (let p = 0; p < prefixes.length; p++) {
       if (waitUntilScanDeadline(startMs, signal)) break;
@@ -55,21 +62,11 @@ export async function scanDiscoveryCandidates(
       const tvs = await discoverTvsOnNetwork(
         prefix,
         (scanned, total) => {
-          const passBase = ((pass - 1) / Math.max(pass, 1)) * 0.35;
-          const prefixSlice = (p / prefixes.length) * 0.65;
-          const hostSlice = total > 0 ? (scanned / total) * (0.65 / prefixes.length) : 0;
-          const pct = Math.min(
-            99,
-            Math.round(
-              ((Date.now() - startMs) / SCAN_DURATION_MS) * 100 * 0.85 +
-                (passBase + prefixSlice + hostSlice) * 15,
-            ),
-          );
           const sec = Math.floor((Date.now() - startMs) / 1000);
-          onProgress?.({
+          emitProgress({
             elapsedMs: Date.now() - startMs,
             totalMs: SCAN_DURATION_MS,
-            pct,
+            pct: Math.min(99, Math.round((scanned / total) * 100)),
             label: `${sec}s / 45s · ${prefix}.x (${scanned}/${total})`,
           });
         },
@@ -81,13 +78,16 @@ export async function scanDiscoveryCandidates(
         seenHosts.add(tv.host);
         candidates.push(tvToCandidate(tv));
       }
-
     }
 
     if (isScanAborted(signal)) break;
+    if (pass >= SCAN_MAX_FULL_PASSES) break;
+    if (waitUntilScanDeadline(startMs, signal)) break;
+
+    await sleepScan(2500, signal);
   }
 
-  reportScanProgress(startMs, onProgress);
+  reportScanProgress(startMs, emitProgress);
   return candidates;
 }
 

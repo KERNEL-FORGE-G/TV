@@ -105,10 +105,15 @@ export const ProximitySolarScan: React.FC<ProximitySolarScanProps> = ({
   }, [candidates, selectedId]);
 
   useEffect(() => {
+    if (scanning) {
+      orbitSpin.stopAnimation();
+      orbitSpin.setValue(0);
+      return;
+    }
     const spinLoop = Animated.loop(
       Animated.timing(orbitSpin, {
         toValue: 1,
-        duration: scanning ? 14000 : 48000,
+        duration: 48000,
         easing: Easing.linear,
         useNativeDriver: true,
       }),

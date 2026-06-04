@@ -10,6 +10,7 @@ import {
 import { isBlePeripheralReachable } from './availability';
 import {
   isScanAborted,
+  createThrottledScanProgress,
   normalizeScanOptions,
   reportScanProgress,
   scanTimeRemainingMs,
@@ -93,6 +94,7 @@ export async function scanBluetoothCandidates(
   options?: DiscoveryScanOptions | ((pct: number) => void),
 ): Promise<DiscoveryCandidate[]> {
   const { signal, onProgress } = normalizeScanOptions(options);
+  const emitProgress = createThrottledScanProgress(450, onProgress);
   const startMs = Date.now();
 
   if (!(await ensureBluetoothPermissions())) {
@@ -110,7 +112,7 @@ export async function scanBluetoothCandidates(
     return [];
   }
 
-  reportScanProgress(startMs, onProgress, 'appareils appairés');
+  reportScanProgress(startMs, emitProgress, 'appareils appairés');
 
   const entries: { peripheral: BlePeripheral; source: 'bonded' | 'scan' }[] =
     [];
@@ -128,7 +130,7 @@ export async function scanBluetoothCandidates(
     const remainSec = Math.ceil(scanTimeRemainingMs(startMs) / 1000);
     if (remainSec < 1) break;
 
-    reportScanProgress(startMs, onProgress, 'scan Bluetooth actif');
+    reportScanProgress(startMs, emitProgress, 'scan Bluetooth actif');
     const nearby = await scanNearbyBle(remainSec, signal);
     const bondedIds = new Set(entries.map((e) => e.peripheral.id));
     for (const p of nearby) {
@@ -144,7 +146,7 @@ export async function scanBluetoothCandidates(
 
   const available: DiscoveryCandidate[] = [];
   if (entries.length === 0) {
-    reportScanProgress(startMs, onProgress);
+    reportScanProgress(startMs, emitProgress);
     return available;
   }
 
@@ -169,12 +171,12 @@ export async function scanBluetoothCandidates(
     });
     reportScanProgress(
       startMs,
-      onProgress,
+      emitProgress,
       `vérification ${Math.min(i + batchSize, entries.length)}/${entries.length}`,
     );
   }
 
-  reportScanProgress(startMs, onProgress);
+  reportScanProgress(startMs, emitProgress);
   return available;
 }
 

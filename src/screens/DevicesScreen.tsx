@@ -56,6 +56,14 @@ export const DevicesScreen: React.FC = () => {
   const [scanning, setScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState('');
   const scanAbortRef = useRef<AbortController | null>(null);
+  const scanMountedRef = useRef(true);
+
+  useEffect(() => {
+    scanMountedRef.current = true;
+    return () => {
+      scanMountedRef.current = false;
+    };
+  }, []);
   const [subnet, setSubnet] = useState(preferences.defaultSubnet || guessLocalSubnet());
   const [healthLoading, setHealthLoading] = useState(false);
   const [discoveryMode, setDiscoveryMode] = useState<DiscoveryMode>('wifi');
@@ -100,7 +108,9 @@ export const DevicesScreen: React.FC = () => {
 
     try {
       const onProgress = (info: { label: string }) => {
-        setScanProgress(info.label);
+        if (scanMountedRef.current && !signal.aborted) {
+          setScanProgress(info.label);
+        }
       };
 
       if (discoveryMode === 'wifi') {
@@ -114,8 +124,10 @@ export const DevicesScreen: React.FC = () => {
         if (signal.aborted) {
           aborted = true;
         }
-        setDiscoveryCandidates(mergeScanResults(found));
-        if (!aborted && found.length === 0) {
+        if (scanMountedRef.current) {
+          setDiscoveryCandidates(mergeScanResults(found));
+        }
+        if (!aborted && scanMountedRef.current && found.length === 0) {
           Alert.alert(
             'Aucun appareil',
             `Aucune TV détectée sur ${subnet}.x en 45 s.\n\n• Même Wi‑Fi que la TV\n• Télécommande réseau activée sur la TV\n• Corrigez le préfixe si besoin (ex. 192.168.0)\n\nRelancez le scan ou arrêtez-le plus tôt si besoin.`,
@@ -137,8 +149,10 @@ export const DevicesScreen: React.FC = () => {
         if (signal.aborted) {
           aborted = true;
         }
-        setDiscoveryCandidates(mergeScanResults(found));
-        if (!aborted && found.length === 0) {
+        if (scanMountedRef.current) {
+          setDiscoveryCandidates(mergeScanResults(found));
+        }
+        if (!aborted && scanMountedRef.current && found.length === 0) {
           Alert.alert(
             'Aucun appareil Bluetooth',
             'Aucun appareil appairé ou détecté en 45 s.\n\n• Activez le Bluetooth sur ce téléphone\n• Appairez la TV depuis le menu Bluetooth Android\n• Revenez ici et relancez le scan\n\nVous pouvez arrêter le scan à tout moment.',
@@ -149,8 +163,10 @@ export const DevicesScreen: React.FC = () => {
       if (scanAbortRef.current === controller) {
         scanAbortRef.current = null;
       }
-      setScanning(false);
-      setScanProgress('');
+      if (scanMountedRef.current) {
+        setScanning(false);
+        setScanProgress('');
+      }
     }
   };
 

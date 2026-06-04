@@ -16,6 +16,7 @@ Application mobile **Android** (iOS prévu) pour piloter téléviseurs et appare
 | [docs/04-SERVICES-ET-LOGIQUE.md](docs/04-SERVICES-ET-LOGIQUE.md) | Découverte, routage, IR, Smart TV, persistance |
 | [docs/05-REFERENCE-FICHIERS.md](docs/05-REFERENCE-FICHIERS.md) | Référence A→Z de chaque fichier |
 | [docs/06-DEVELOPPEMENT.md](docs/06-DEVELOPPEMENT.md) | Installation, scripts npm, build APK, logo |
+| [docs/07-DECOUVERTE-SCAN.md](docs/07-DECOUVERTE-SCAN.md) | Scan appareils, TV vs BT, stabilité |
 
 ## Démarrage rapide
 

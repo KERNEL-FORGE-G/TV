@@ -6,9 +6,12 @@ import { probeSamsung } from './smartTv/samsung';
 import { fetchWithTimeout, subnetHosts } from '../utils/network';
 import type { DiscoveredTv } from './smartTv/types';
 
-/** Scan rapide : timeouts courts, forte parallélisation. */
+/** Timeouts courts ; parallélisme modéré (évite crash réseau / OOM vers ~25 s sur mobile). */
 const SCAN_TIMEOUT_MS = 420;
-const HOST_CONCURRENCY = 56;
+const HOST_CONCURRENCY = 14;
+/** Hôtes traités par vague, puis courte pause pour libérer les sockets. */
+const HOST_WAVE_SIZE = 36;
+const WAVE_PAUSE_MS = 700;
 
 async function mapPool<T, R>(
   items: T[],
@@ -91,6 +94,21 @@ async function probeHost(host: string): Promise<DiscoveredTv | null> {
 /**
  * Scan /24 : uniquement les hôtes qui répondent comme une Smart TV connue.
  */
+function sleepMs(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) return Promise.resolve();
+  return new Promise((resolve) => {
+    const t = setTimeout(resolve, ms);
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(t);
+        resolve();
+      },
+      { once: true },
+    );
+  });
+}
+
 export async function discoverTvsOnNetwork(
   subnetPrefix: string,
   onProgress?: (scanned: number, total: number) => void,
@@ -99,21 +117,33 @@ export async function discoverTvsOnNetwork(
   const hosts = subnetHosts(subnetPrefix);
   const total = hosts.length;
   let scanned = 0;
+  const found: DiscoveredTv[] = [];
 
-  const found = await mapPool(
-    hosts,
-    HOST_CONCURRENCY,
-    async (host) => {
-      if (signal?.aborted) return null;
-      const tv = await probeHost(host);
-      scanned += 1;
-      if (onProgress && (scanned % 12 === 0 || scanned === total)) {
-        onProgress(scanned, total);
-      }
-      return tv;
-    },
-    signal,
-  );
+  for (let waveStart = 0; waveStart < hosts.length; waveStart += HOST_WAVE_SIZE) {
+    if (signal?.aborted) break;
+
+    const wave = hosts.slice(waveStart, waveStart + HOST_WAVE_SIZE);
+    const waveFound = await mapPool(
+      wave,
+      HOST_CONCURRENCY,
+      async (host) => {
+        if (signal?.aborted) return null;
+        return probeHost(host);
+      },
+      signal,
+    );
+
+    for (const tv of waveFound) {
+      if (tv) found.push(tv);
+    }
+
+    scanned = Math.min(total, waveStart + wave.length);
+    onProgress?.(scanned, total);
+
+    if (waveStart + HOST_WAVE_SIZE < hosts.length && !signal?.aborted) {
+      await sleepMs(WAVE_PAUSE_MS, signal);
+    }
+  }
 
   onProgress?.(total, total);
   return found;

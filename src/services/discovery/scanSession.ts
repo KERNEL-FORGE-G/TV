@@ -54,3 +54,40 @@ export function waitUntilScanDeadline(
 ): boolean {
   return isScanAborted(signal) || Date.now() - startMs >= SCAN_DURATION_MS;
 }
+
+/** Limite les mises à jour UI pendant un scan long (évite surcharge React Native). */
+export function createThrottledScanProgress(
+  minIntervalMs: number,
+  onProgress?: (info: ScanProgressInfo) => void,
+): (info: ScanProgressInfo) => void {
+  let lastEmit = 0;
+  return (info) => {
+    if (!onProgress) return;
+    const now = Date.now();
+    if (info.pct >= 100 || now - lastEmit >= minIntervalMs) {
+      lastEmit = now;
+      onProgress(info);
+    }
+  };
+}
+
+export async function sleepScan(
+  ms: number,
+  signal?: AbortSignal,
+): Promise<void> {
+  if (isScanAborted(signal)) return;
+  await new Promise<void>((resolve) => {
+    const t = setTimeout(() => resolve(), ms);
+    signal?.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(t);
+        resolve();
+      },
+      { once: true },
+    );
+  });
+}
+
+/** Nombre max de balayages /24 complets sur la fenêtre 45 s (évite crash ~25 s). */
+export const SCAN_MAX_FULL_PASSES = 2;

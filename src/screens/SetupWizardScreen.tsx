@@ -31,6 +31,15 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
   const [scanning, setScanning] = useState(false);
   const [scanProgress, setScanProgress] = useState('');
   const scanAbortRef = useRef<AbortController | null>(null);
+  const scanMountedRef = useRef(true);
+
+  useEffect(() => {
+    scanMountedRef.current = true;
+    return () => {
+      scanMountedRef.current = false;
+      scanAbortRef.current?.abort();
+    };
+  }, []);
   const [subnet, setSubnet] = useState('192.168.1');
   const [brandId, setBrandId] = useState('samsung');
   const [scanResults, setScanResults] = useState<DiscoveryCandidate[]>([]);
@@ -74,16 +83,24 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
     try {
       const candidates = await scanDiscoveryCandidates(subnet, {
         signal: controller.signal,
-        onProgress: (info) => setScanProgress(info.label),
+        onProgress: (info) => {
+          if (scanMountedRef.current && !controller.signal.aborted) {
+            setScanProgress(info.label);
+          }
+        },
       });
-      setDiscoveryCandidates(candidates);
-      setScanResults(candidates);
+      if (scanMountedRef.current) {
+        setDiscoveryCandidates(candidates);
+        setScanResults(candidates);
+      }
     } finally {
       if (scanAbortRef.current === controller) {
         scanAbortRef.current = null;
       }
-      setScanning(false);
-      setScanProgress('');
+      if (scanMountedRef.current) {
+        setScanning(false);
+        setScanProgress('');
+      }
     }
   };
 
