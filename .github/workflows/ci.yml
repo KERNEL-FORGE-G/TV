@@ -106,6 +106,9 @@ jobs:
           restore-keys: |
             gradle-${{ runner.os }}-
 
+      - name: Grant Gradle wrapper execute permission
+        run: chmod +x android/gradlew
+
       - name: Build release APK
         working-directory: android
         run: ./gradlew assembleRelease --no-daemon --stacktrace
