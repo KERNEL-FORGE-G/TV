@@ -6,10 +6,10 @@ export function useDevices() {
   const { devices, activeDeviceId, setActiveDevice, addDevice, removeDevice, updateDevice } =
     useRemoteStore();
 
-  const activeDevice = useMemo(
-    () => devices.find((d) => d.id === activeDeviceId) ?? devices[0],
-    [devices, activeDeviceId]
-  );
+  const activeDevice = useMemo(() => {
+    if (!devices.length) return undefined;
+    return devices.find((d) => d.id === activeDeviceId) ?? devices[0];
+  }, [devices, activeDeviceId]);
 
   const onlineDevices = useMemo(() => devices.filter((d) => d.isOnline), [devices]);
 

@@ -1,6 +1,21 @@
 pluginManagement { includeBuild("../node_modules/@react-native/gradle-plugin") }
 plugins { id("com.facebook.react.settings") }
-extensions.configure(com.facebook.react.ReactSettingsExtension){ ex -> ex.autolinkLibrariesFromCommand() }
+
+// Pas de npx/node dans Gradle (PATH nvm + fork EAGAIN) — config générée par npm run autolink
+def autolinkConfig = file("../autolinking.android.json")
+if (!autolinkConfig.exists()) {
+    autolinkConfig = file("build/generated/autolinking/autolinking.json")
+}
+
+extensions.configure(com.facebook.react.ReactSettingsExtension) { ex ->
+    if (autolinkConfig.exists()) {
+        ex.autolinkLibrariesFromConfigFile(autolinkConfig)
+    } else {
+        throw new GradleException(
+            "Fichier d'autolinking manquant. Depuis la racine du projet : npm run autolink"
+        )
+    }
+}
 rootProject.name = 'telecommande'
 include ':app'
 includeBuild('../node_modules/@react-native/gradle-plugin')

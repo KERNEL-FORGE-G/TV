@@ -3,20 +3,35 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "preandroid": "npm run autolink",
     "android": "react-native run-android",
+    "preapk": "npm run autolink",
+    "apk": "bash scripts/build-apk-release.sh",
     "ios": "react-native run-ios",
     "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "verify": "npm run lint && npm run typecheck && npm run test",
     "start": "react-native start",
-    "test": "jest"
+    "test": "jest --maxWorkers=2",
+    "cleanup": "bash scripts/cleanup-saturation.sh",
+    "autolink": "node node_modules/@react-native-community/cli/build/bin.js config > autolinking.android.json",
+    "postinstall": "bash scripts/patch-react-native-ir-manager.sh",
+    "logo": "bash scripts/build-logo.sh"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
+    "@react-native-community/netinfo": "^11.5.2",
     "@react-native/new-app-screen": "0.85.3",
+    "@react-navigation/bottom-tabs": "^7.16.2",
+    "@react-navigation/native": "^7.2.5",
     "react": "19.2.3",
     "react-native": "0.85.3",
+    "react-native-ble-manager": "^12.5.0",
     "react-native-gesture-handler": "^3.0.0",
     "react-native-haptic-feedback": "^3.0.0",
+    "react-native-ir-manager": "^0.0.4",
     "react-native-safe-area-context": "^5.8.0",
+    "react-native-screens": "^4.25.2",
     "zustand": "^5.0.14"
   },
   "devDependencies": {

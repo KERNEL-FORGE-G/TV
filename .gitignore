@@ -24,10 +24,12 @@ DerivedData
 
 # Android/IntelliJ
 #
+telecommande-release.apk
 build/
 .idea
 .gradle
 local.properties
+autolinking.android.json
 *.iml
 *.hprof
 .cxx/
@@ -65,6 +67,9 @@ yarn-error.log
 
 # testing
 /coverage
+
+# Dossier local imbriqué (ne pas versionner)
+/dev/
 
 # Yarn
 .yarn/*

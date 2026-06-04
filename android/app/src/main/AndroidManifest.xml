@@ -1,6 +1,40 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
+    <!-- Réseau : scan LAN, Smart TV (HTTP), NetInfo -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!-- Android 13+ : IP Wi‑Fi sans localisation -->
+    <uses-permission
+        android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="33" />
+    <!-- Android 10–12 : détection sous-réseau (NetInfo) -->
+    <uses-permission
+        android:name="android.permission.ACCESS_FINE_LOCATION"
+        android:maxSdkVersion="32" />
+
+    <!-- Retour haptique -->
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <!-- Port infrarouge (ConsumerIrManager) -->
+    <uses-permission android:name="android.permission.TRANSMIT_IR" />
+
+    <!-- Bluetooth (futur / appairage système) -->
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
+        android:maxSdkVersion="30" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="31" />
+
+    <!-- Matériel optionnel : l’app s’installe aussi sans IR -->
+    <uses-feature
+        android:name="android.hardware.consumerir"
+        android:required="false" />
 
     <application
       android:name=".MainApplication"

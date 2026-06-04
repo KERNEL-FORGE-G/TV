@@ -1,13 +1,14 @@
-import React from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-  StatusBar,
-  TouchableOpacity,
-  SafeAreaView,
-} from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, StyleSheet, StatusBar } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { Screen } from '../components/Screen';
+import { AppHeader } from '../components/ui/AppHeader';
+import { Card } from '../components/ui/Card';
+import { SectionBlock } from '../components/ui/SectionBlock';
+import { ScreenScroll } from '../components/ui/ScreenScroll';
+import { ScreenEnter } from '../components/ui/ScreenEnter';
+import { FadeIn } from '../components/ui/FadeIn';
+import { Badge } from '../components/ui/Badge';
 import { useIR } from '../hooks/useIR';
 import { useDevices } from '../hooks/useDevices';
 import { DeviceSelector } from '../components/DeviceSelector';
@@ -15,206 +16,251 @@ import { NavPad } from '../components/NavPad';
 import { NumPad } from '../components/NumPad';
 import { VolumeControls } from '../components/VolumeControls';
 import { RemoteButton } from '../components/RemoteButton';
-import { colors, spacing, radius, typography } from '../theme';
+import { DynamicRemotePanel } from '../components/DynamicRemotePanel';
+import { FavoritesBar } from '../components/FavoritesBar';
+import { TouchPad } from '../components/TouchPad';
+import { TvKeyboardModal } from '../components/TvKeyboardModal';
+import { MediaControls } from '../components/MediaControls';
+import { FavoriteEditorModal } from '../components/FavoriteEditorModal';
+import { supportsTvKeyboard } from '../services/smartTv/wifiCommands';
+import { routeLabel, resolveTransportRoute } from '../services/routing/CommandRouter';
+import { useRemoteStore } from '../store/remoteStore';
+import { EmptyState } from '../components/ui/EmptyState';
+import { colors, spacing, typography, motion } from '../theme';
+
+const QUICK_KEYS = [
+  { cmd: 'menu', label: 'Menu' },
+  { cmd: 'source', label: 'Source' },
+  { cmd: 'home', label: 'Accueil' },
+  { cmd: 'back', label: 'Retour' },
+];
+
+const S = motion.stagger;
 
 export const RemoteScreen: React.FC = () => {
-  const { sendCommand, isSending } = useIR();
+  const navigation = useNavigation();
+  const { sendCommand, sendText, isSending } = useIR();
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [favOpen, setFavOpen] = useState(false);
   const { devices, activeDevice, activeDeviceId, setActiveDevice } = useDevices();
+  const householdName = useRemoteStore((s) => s.householdName);
+  const allFavorites = useRemoteStore((s) => s.favorites);
+  const favorites = useMemo(
+    () => allFavorites.filter((f) => f.deviceId === activeDeviceId),
+    [allFavorites, activeDeviceId],
+  );
+
+  const route = activeDevice ? resolveTransportRoute(activeDevice) : null;
+
+  if (devices.length === 0) {
+    return (
+      <Screen>
+        <StatusBar barStyle="light-content" backgroundColor={colors.bg.primary} />
+        <ScreenEnter>
+          <AppHeader title="Télécommande" subtitle={householdName} />
+          <EmptyState
+            title="Aucun appareil"
+            message="Scannez votre réseau ou ajoutez une TV (Wi‑Fi ou IR) pour utiliser la télécommande."
+            actionLabel="Ajouter un appareil"
+            onAction={() => navigation.navigate('Devices' as never)}
+          />
+        </ScreenEnter>
+      </Screen>
+    );
+  }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <Screen>
       <StatusBar barStyle="light-content" backgroundColor={colors.bg.primary} />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Télécommande</Text>
-        <TouchableOpacity style={styles.addBtn}>
-          <Text style={styles.addBtnText}>＋</Text>
-        </TouchableOpacity>
-      </View>
+      <ScreenEnter>
+        <AppHeader title="Télécommande" subtitle={householdName} />
 
-      {/* Sélecteur d'appareil */}
-      <DeviceSelector
-        devices={devices}
-        activeDeviceId={activeDeviceId}
-        onSelect={setActiveDevice}
-      />
-
-      <ScrollView
-        style={styles.scroll}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {/* Info appareil + Power */}
-        <View style={styles.deviceCard}>
-          <View>
-            <Text style={styles.deviceMeta}>En cours</Text>
-            <Text style={styles.deviceName}>{activeDevice?.name ?? '—'}</Text>
-            {activeDevice?.model && (
-              <Text style={styles.deviceModel}>{activeDevice.model}</Text>
-            )}
-          </View>
-          <RemoteButton
-            label={activeDevice?.isPoweredOn ? '⏻' : '⏻'}
-            onPress={() => sendCommand('power')}
-            variant={activeDevice?.isPoweredOn ? 'danger' : 'ghost'}
-            shape="round"
-            style={[
-              styles.powerBtn,
-              activeDevice?.isPoweredOn && styles.powerBtnOn,
-            ]}
-            textStyle={{ fontSize: 20 }}
-            loading={isSending}
+        <FadeIn delay={S}>
+          <DeviceSelector
+            devices={devices}
+            activeDeviceId={activeDeviceId}
+            onSelect={setActiveDevice}
           />
-        </View>
+        </FadeIn>
 
-        <View style={styles.divider} />
+        <ScreenScroll>
+          <SectionBlock delay={S * 2} first>
+            <Card glow style={styles.heroCard} padded>
+              <View style={styles.heroRow}>
+                <View style={styles.heroText}>
+                  <Text style={styles.heroLabel}>Appareil actif</Text>
+                  <Text style={styles.heroName}>{activeDevice?.name ?? '—'}</Text>
+                  {activeDevice?.model ? (
+                    <Text style={styles.heroModel}>{activeDevice.model}</Text>
+                  ) : null}
+                  {route && activeDevice ? (
+                    <Badge
+                      label={`${routeLabel(route)}${activeDevice.connection?.host ? ` · ${activeDevice.connection.host}` : ''}`}
+                      tone="accent"
+                    />
+                  ) : null}
+                </View>
+                <RemoteButton
+                  label="⏻"
+                  onPress={() => sendCommand('power')}
+                  variant={activeDevice?.isPoweredOn ? 'danger' : 'accent'}
+                  shape="round"
+                  size="lg"
+                  style={styles.powerBtn}
+                  textStyle={styles.powerIcon}
+                  loading={isSending}
+                />
+              </View>
+            </Card>
+          </SectionBlock>
 
-        {/* Pavé directionnel */}
-        <View style={styles.section}>
-          <NavPad onCommand={sendCommand} />
-        </View>
+          <SectionBlock title="Pavé tactile" delay={S * 3} center>
+            <TouchPad onCommand={sendCommand} />
+          </SectionBlock>
 
-        <View style={styles.divider} />
+          <SectionBlock title="Navigation" delay={S * 4} center>
+            <NavPad onCommand={sendCommand} />
+          </SectionBlock>
 
-        {/* Volume & Chaînes */}
-        <View style={styles.section}>
-          <VolumeControls onCommand={sendCommand} />
-        </View>
+          {activeDevice ? (
+            <SectionBlock title="Média" delay={S * 5} first={false}>
+              <MediaControls device={activeDevice} onCommand={sendCommand} />
+            </SectionBlock>
+          ) : null}
 
-        <View style={styles.divider} />
+          <SectionBlock title="Audio & chaînes" delay={S * 6}>
+            <VolumeControls onCommand={sendCommand} />
+          </SectionBlock>
 
-        {/* Actions rapides : Menu / Source / Home */}
-        <View style={styles.quickActions}>
-          {['menu', 'source', 'home', 'back'].map((cmd) => (
-            <RemoteButton
-              key={cmd}
-              label={cmd.toUpperCase()}
-              onPress={() => sendCommand(cmd)}
-              variant="ghost"
-              style={styles.quickBtn}
-              textStyle={styles.quickBtnText}
-            />
-          ))}
-        </View>
+          <SectionBlock title="Raccourcis" delay={S * 7}>
+            <View style={styles.quickRow}>
+              {QUICK_KEYS.map(({ cmd, label }, i) => (
+                <View
+                  key={cmd}
+                  style={[
+                    styles.quickCell,
+                    i < QUICK_KEYS.length - 1 && styles.quickCellGap,
+                  ]}
+                >
+                  <RemoteButton
+                    label={label}
+                    onPress={() => sendCommand(cmd)}
+                    variant="ghost"
+                    shape="pill"
+                    style={styles.quickBtn}
+                    textStyle={styles.quickText}
+                  />
+                </View>
+              ))}
+            </View>
+          </SectionBlock>
 
-        <View style={styles.divider} />
+          {activeDevice ? (
+            <FadeIn delay={S * 8}>
+              <FavoritesBar
+                favorites={favorites}
+                onSelect={sendCommand}
+                onAdd={() => setFavOpen(true)}
+              />
+              <DynamicRemotePanel device={activeDevice} onCommand={sendCommand} />
+            </FadeIn>
+          ) : null}
 
-        {/* Pavé numérique */}
-        <View style={styles.section}>
-          <Text style={styles.sectionLabel}>CHIFFRES</Text>
-          <NumPad onCommand={sendCommand} />
-        </View>
+          {activeDevice?.tvPlatform && supportsTvKeyboard(activeDevice.tvPlatform) ? (
+            <SectionBlock title="Clavier" delay={S * 9}>
+              <RemoteButton
+                label="⌨ Clavier TV"
+                onPress={() => setKeyboardOpen(true)}
+                variant="accent"
+                shape="pill"
+                style={styles.keyboardBtn}
+              />
+            </SectionBlock>
+          ) : null}
 
-        <View style={{ height: 32 }} />
-      </ScrollView>
-    </SafeAreaView>
+          <SectionBlock title="Pavé numérique" delay={S * 10}>
+            <NumPad onCommand={sendCommand} />
+          </SectionBlock>
+        </ScreenScroll>
+      </ScreenEnter>
+
+      {activeDevice ? (
+        <>
+          <TvKeyboardModal
+            visible={keyboardOpen}
+            deviceName={activeDevice.name}
+            onClose={() => setKeyboardOpen(false)}
+            onSend={sendText}
+          />
+          <FavoriteEditorModal
+            visible={favOpen}
+            deviceId={activeDevice.id}
+            deviceName={activeDevice.name}
+            onClose={() => setFavOpen(false)}
+          />
+        </>
+      ) : null}
+    </Screen>
   );
 };
 
 const styles = StyleSheet.create({
-  safe: {
-    flex: 1,
-    backgroundColor: colors.bg.primary,
+  heroCard: {
+    marginBottom: 0,
   },
-  header: {
+  heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 0.5,
-    borderBottomColor: colors.border.default,
   },
-  headerTitle: {
-    fontSize: typography.size.lg,
-    color: colors.text.primary,
-    fontWeight: typography.weight.semibold,
-    letterSpacing: 0.3,
-  },
-  addBtn: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  addBtnText: {
-    fontSize: 22,
-    color: colors.accent.blue,
-  },
-  scroll: { flex: 1 },
-  scrollContent: {
-    paddingTop: spacing.md,
-  },
-  deviceCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginHorizontal: spacing.lg,
-    backgroundColor: colors.bg.card,
-    padding: spacing.md,
-    borderRadius: radius.lg,
-    borderWidth: 0.5,
-    borderColor: colors.border.default,
-    marginBottom: spacing.md,
-  },
-  deviceMeta: {
+  heroText: { flex: 1, paddingRight: spacing.md },
+  heroLabel: {
     fontSize: typography.size.xs,
     color: colors.text.muted,
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    letterSpacing: typography.letterSpacing.caps,
+    textTransform: 'uppercase',
+    marginBottom: 4,
   },
-  deviceName: {
-    fontSize: typography.size.lg,
+  heroName: {
+    fontSize: typography.size.xl,
+    fontWeight: typography.weight.bold,
     color: colors.text.primary,
-    fontWeight: typography.weight.semibold,
   },
-  deviceModel: {
-    fontSize: typography.size.xs,
+  heroModel: {
+    fontSize: typography.size.sm,
     color: colors.text.secondary,
     marginTop: 2,
   },
   powerBtn: {
-    width: 48,
-    height: 48,
-    borderRadius: radius.full,
+    width: 64,
+    height: 64,
   },
-  powerBtnOn: {
-    backgroundColor: `${colors.accent.red}22`,
-    borderColor: colors.accent.red,
-    borderWidth: 1,
+  powerIcon: {
+    fontSize: 24,
   },
-  section: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    alignItems: 'center',
-  },
-  sectionLabel: {
-    fontSize: typography.size.xs,
-    color: colors.text.muted,
-    letterSpacing: 1,
-    marginBottom: spacing.sm,
-    alignSelf: 'flex-start',
-  },
-  divider: {
-    height: 0.5,
-    backgroundColor: colors.border.default,
-    marginHorizontal: spacing.lg,
-  },
-  quickActions: {
+  quickRow: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
+    alignItems: 'stretch',
+  },
+  quickCell: {
+    flex: 1,
+    minHeight: 44,
+  },
+  quickCellGap: {
+    marginRight: spacing.sm,
   },
   quickBtn: {
-    paddingHorizontal: spacing.md,
-    height: 36,
-    borderRadius: radius.md,
+    flex: 1,
+    minHeight: 44,
+    paddingHorizontal: spacing.xs,
   },
-  quickBtnText: {
-    fontSize: typography.size.xs,
-    letterSpacing: 0.8,
-    color: colors.text.secondary,
+  quickText: {
+    fontSize: typography.size.sm,
+    fontWeight: typography.weight.medium,
+  },
+  keyboardBtn: {
+    minHeight: 48,
+    width: '100%',
   },
 });
