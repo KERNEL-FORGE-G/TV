@@ -1,7 +1,7 @@
 # Télécommande universelle (React Native)
 
 
-[![CI & Android Release](https://github.com/AngeTrecy/telecommande/actions/workflows/ci.yml/badge.svg)](https://github.com/AngeTrecy/telecommande/actions/workflows/ci.yml)
+[![CI & Android Release](https://github.com/KERNEL-FORGE-G/TV/actions/workflows/ci.yml/badge.svg)](https://github.com/KERNEL-FORGE-G/TV/actions/workflows/ci.yml)
 
 Application mobile **Android** (iOS prévu) pour piloter téléviseurs et appareils du salon : **Wi‑Fi** (Roku, LG, Samsung, Sony, Philips), **infrarouge** (émetteur du téléphone), **Bluetooth**, et scènes multi-appareils.
 

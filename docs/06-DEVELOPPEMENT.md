@@ -45,7 +45,7 @@ Workflow : [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) — **CI & 
 
 **Artefact APK :** après un build réussi, télécharger `telecommande-release-apk` depuis l’onglet **Actions** → exécution → **Artifacts** (rétention 90 jours). Contient `telecommande-release.apk` et une copie nommée avec le SHA du commit.
 
-Badge : `![CI](https://github.com/AngeTrecy/telecommande/actions/workflows/ci.yml/badge.svg)`
+Badge : `![CI](https://github.com/KERNEL-FORGE-G/TV/actions/workflows/ci.yml/badge.svg)`
 
 ---
 
