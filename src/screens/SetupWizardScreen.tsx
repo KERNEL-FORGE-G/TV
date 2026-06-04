@@ -97,7 +97,7 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
     Object.assign(dev, partial);
     addDevice(dev);
     setActiveDevice(dev.id);
-    setStep(2);
+    finish();
   };
 
   const addIrTv = async () => {
@@ -117,6 +117,17 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
   const finish = () => {
     setOnboardingComplete(true);
     onDone();
+  };
+
+  /** Passe le scan réseau et ouvre l’app (ajout TV plus tard dans Appareils). */
+  const skipNetworkScan = () => {
+    if (scanning) stopScan();
+    finish();
+  };
+
+  const goToManualIrSetup = () => {
+    if (scanning) stopScan();
+    setStep(2);
   };
 
   return (
@@ -187,7 +198,8 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
         <Card style={styles.panel}>
           <Text style={styles.title}>Découverte réseau</Text>
           <Text style={styles.body}>
-            Recherche automatique des TV Roku, Sony, Philips et hubs Broadlink sur votre LAN.
+            Recherche automatique des TV Roku, Sony, LG, Samsung, Philips sur votre LAN.
+            Vous pouvez passer cette étape et configurer vos appareils plus tard.
           </Text>
           <Text style={styles.fieldLabel}>Préfixe réseau</Text>
           <TextInput
@@ -231,8 +243,16 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
             </View>
           ) : null}
 
-          <TouchableOpacity style={styles.link} onPress={() => setStep(2)}>
-            <Text style={styles.linkText}>Configurer manuellement (IR) →</Text>
+          <TouchableOpacity
+            style={[styles.btn, styles.btnSkip]}
+            onPress={skipNetworkScan}
+            disabled={scanning}
+          >
+            <Text style={styles.btnSkipText}>Passer le scan réseau</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.link} onPress={goToManualIrSetup} disabled={scanning}>
+            <Text style={styles.linkText}>Configurer une TV en infrarouge →</Text>
           </TouchableOpacity>
         </Card>
       )}
@@ -256,6 +276,9 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
           ))}
           <TouchableOpacity style={styles.btn} onPress={addIrTv}>
             <Text style={styles.btnText}>Ajouter cette TV</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.link} onPress={skipNetworkScan}>
+            <Text style={styles.linkText}>Passer et terminer la configuration →</Text>
           </TouchableOpacity>
         </Card>
       )}
@@ -379,6 +402,16 @@ const styles = StyleSheet.create({
   btnStopText: {
     ...forms.btnPrimaryText,
     color: colors.accent.primary,
+  },
+  btnSkip: {
+    backgroundColor: colors.bg.elevated,
+    borderWidth: 1.5,
+    borderColor: colors.border.default,
+    marginTop: spacing.md,
+  },
+  btnSkipText: {
+    ...forms.btnPrimaryText,
+    color: colors.text.secondary,
   },
   scanProgress: {
     textAlign: 'center',

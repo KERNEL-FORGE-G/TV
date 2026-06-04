@@ -28,8 +28,8 @@ Navigation : **4 onglets** + **assistant initial** + **modales**. Thème central
 Assistant en **4 étapes** (`STEPS`) :
 
 1. **Matériel** — détection émetteur IR (`getIrHardwareStatus`).
-2. **Réseau** — préfixe sous-réseau, scan **45 s** avec arrêt, liste des TV trouvées.
-3. **Première TV** — choix scan, marque IR (`IR_BRAND_DATABASE`), ou saut.
+2. **Réseau** — scan **45 s** optionnel ; **Passer le scan réseau** termine l’assistant sans TV ; lien vers configuration IR manuelle.
+3. **Première TV** — marque IR (`IR_BRAND_DATABASE`) ou passage direct à l’app.
 4. **Terminé** — `setOnboardingComplete(true)`, callback `onDone`.
 
 ---
