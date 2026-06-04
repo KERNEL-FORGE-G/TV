@@ -8,6 +8,7 @@ import {
   type BlePeripheral,
 } from '../ble/bleManagerBridge';
 import { isBlePeripheralReachable } from './availability';
+import { calibrateDiscoveryCandidates } from './deviceCalibration';
 import {
   isScanAborted,
   createThrottledScanProgress,
@@ -174,6 +175,17 @@ export async function scanBluetoothCandidates(
       emitProgress,
       `vérification ${Math.min(i + batchSize, entries.length)}/${entries.length}`,
     );
+  }
+
+  if (available.length > 0 && !isScanAborted(signal)) {
+    reportScanProgress(startMs, emitProgress, 'calibrage Bluetooth');
+    return calibrateDiscoveryCandidates(available, signal, (done, total) => {
+      reportScanProgress(
+        startMs,
+        emitProgress,
+        `calibrage BT (${done}/${total})`,
+      );
+    });
   }
 
   reportScanProgress(startMs, emitProgress);

@@ -53,19 +53,15 @@ async function probePhilips(host: string): Promise<string | null> {
   return null;
 }
 
-/** Sondes en parallèle ; priorité Roku → Samsung → LG → Sony → Philips. */
+/** Sondes ordonnées : première plateforme confirmée (évite mauvaise classification). */
 async function probeHost(host: string): Promise<DiscoveredTv | null> {
-  const [roku, samsung, lg, sony, philips] = await Promise.all([
-    probeRoku(host, 8060, SCAN_TIMEOUT_MS),
-    probeSamsung(host, SCAN_TIMEOUT_MS),
-    probeLg(host, 3000, SCAN_TIMEOUT_MS),
-    probeSony(host, SCAN_TIMEOUT_MS),
-    probePhilips(host),
-  ]);
-
+  const roku = await probeRoku(host, 8060, SCAN_TIMEOUT_MS);
   if (roku) {
-    return { host, platformId: 'roku' as TvPlatformId, name: roku, port: 8060 };
+    const platformId: TvPlatformId = /tcl/i.test(roku) ? 'tcl_roku' : 'roku';
+    return { host, platformId, name: roku, port: 8060 };
   }
+
+  const samsung = await probeSamsung(host, SCAN_TIMEOUT_MS);
   if (samsung) {
     return {
       host,
@@ -74,12 +70,18 @@ async function probeHost(host: string): Promise<DiscoveredTv | null> {
       port: samsung.port,
     };
   }
+
+  const lg = await probeLg(host, 3000, SCAN_TIMEOUT_MS);
   if (lg) {
     return { host, platformId: 'lg_webos' as TvPlatformId, name: lg, port: 3000 };
   }
+
+  const sony = await probeSony(host, SCAN_TIMEOUT_MS);
   if (sony) {
     return { host, platformId: 'sony_bravia' as TvPlatformId, name: sony, port: 80 };
   }
+
+  const philips = await probePhilips(host);
   if (philips) {
     return {
       host,
@@ -88,6 +90,7 @@ async function probeHost(host: string): Promise<DiscoveredTv | null> {
       port: 1925,
     };
   }
+
   return null;
 }
 

@@ -5,12 +5,14 @@ import {
   TouchableOpacity,
   StyleSheet,
   TextInput,
+  Alert,
 } from 'react-native';
 import { getIrHardwareStatus } from '../services/IRService';
 import {
   scanDiscoveryCandidates,
   adoptCandidate,
 } from '../services/discovery/DiscoveryManager';
+import { calibrateDiscoveryCandidate } from '../services/discovery/deviceCalibration';
 import type { DiscoveryCandidate } from '../core/remoteTypes';
 import { createDeviceFromPlatform } from '../data/tvPlatforms';
 import { IR_BRAND_DATABASE } from '../data/irDatabase';
@@ -104,14 +106,28 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
     }
   };
 
-  const addScannedTv = (c: DiscoveryCandidate) => {
-    const partial = adoptCandidate(c, rooms[0]?.id);
-    const dev = createDeviceFromPlatform(c.platformId, {
-      name: partial.name ?? c.name,
-      host: c.host,
-      port: c.port,
+  const addScannedTv = async (c: DiscoveryCandidate) => {
+    const calibrated = await calibrateDiscoveryCandidate(c);
+    if (!calibrated) {
+      Alert.alert(
+        'TV inaccessible',
+        `${c.name} ne répond plus. Vérifiez le Wi‑Fi ou relancez le scan.`,
+      );
+      return;
+    }
+    const partial = adoptCandidate(calibrated, rooms[0]?.id);
+    const dev = createDeviceFromPlatform(calibrated.platformId, {
+      name: partial.name ?? calibrated.name,
+      host: calibrated.host,
+      port: calibrated.port,
     });
     Object.assign(dev, partial);
+    dev.connection = {
+      ...dev.connection,
+      host: calibrated.host,
+      port: calibrated.port ?? dev.connection?.port,
+    };
+    dev.isOnline = true;
     addDevice(dev);
     setActiveDevice(dev.id);
     finish();

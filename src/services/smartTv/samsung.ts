@@ -56,8 +56,12 @@ export async function probeSamsung(
   for (const port of [8001, 8002] as const) {
     try {
       const res = await fetchWithTimeout(`http://${host}:${port}/api/v2/`, {}, timeoutMs);
-      if (res.ok || res.status === 401 || res.status === 403) {
-        const text = await res.text().catch(() => '');
+      const text = await res.text().catch(() => '');
+      const looksSamsung =
+        res.ok ||
+        /samsung|tizen|ms\.remote|Samsung/i.test(text);
+      if (!looksSamsung) continue;
+      if (res.status === 401 || res.status === 403 || res.ok) {
         const match = text.match(/"name"\s*:\s*"([^"]+)"/);
         return {
           name: match?.[1] ? `Samsung ${match[1]}` : 'Samsung TV',

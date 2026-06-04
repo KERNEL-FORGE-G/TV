@@ -13,6 +13,7 @@ import {
   scanDiscoveryCandidates,
   adoptCandidate,
 } from '../services/discovery/DiscoveryManager';
+import { calibrateDiscoveryCandidate } from '../services/discovery/deviceCalibration';
 import { isBleNativeLinked, BLE_REBUILD_HINT } from '../services/ble/bleManagerBridge';
 import type { DiscoveryMode } from '../core/remoteTypes';
 import { createDeviceFromPlatform } from '../data/tvPlatforms';
@@ -170,23 +171,43 @@ export const DevicesScreen: React.FC = () => {
     }
   };
 
-  const adopt = (candidateId: string) => {
+  const adopt = async (candidateId: string) => {
     const c = discoveryCandidates.find((x) => x.id === candidateId);
     if (!c) return;
-    const partial = adoptCandidate(c, rooms[0]?.id);
+
+    const calibrated = await calibrateDiscoveryCandidate(c);
+    if (!calibrated) {
+      Alert.alert(
+        'Appareil inaccessible',
+        `${c.name} ne répond plus ou n’est pas joignable. Relancez un scan ou vérifiez le réseau / Bluetooth.`,
+      );
+      return;
+    }
+
+    const partial = adoptCandidate(calibrated, rooms[0]?.id);
     const platformId =
-      c.protocol === 'Bluetooth' ? 'bluetooth_generic' : c.platformId;
+      calibrated.protocol === 'Bluetooth'
+        ? 'bluetooth_generic'
+        : calibrated.platformId;
     const dev = createDeviceFromPlatform(platformId, {
-      name: partial.name ?? c.name,
-      host: c.host,
-      port: c.port,
-      mac: c.mac,
+      name: partial.name ?? calibrated.name,
+      host: calibrated.host,
+      port: calibrated.port,
+      mac: calibrated.mac,
     });
     Object.assign(dev, partial);
+    if (calibrated.protocol === 'WiFi' && calibrated.host) {
+      dev.connection = {
+        ...dev.connection,
+        host: calibrated.host,
+        port: calibrated.port ?? dev.connection?.port,
+      };
+      dev.isOnline = true;
+    }
     addDevice(dev);
-    updateCandidate(candidateId, 'adopted');
+    updateCandidate(calibrated.id, 'adopted');
     setActiveDevice(dev.id);
-    if (needsPairing(c.platformId)) {
+    if (needsPairing(calibrated.platformId)) {
       setPairDevice(dev);
     }
   };

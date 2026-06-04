@@ -51,6 +51,18 @@ Pas de scan générique Android TV / Fire TV / Apple TV sans API implémentée (
 
 Fichiers : `NetworkDiscoveryService.ts`, `DiscoveryManager.ts`, `availability.ts`.
 
+### Calibrage après détection
+
+À la fin de chaque scan (Wi‑Fi ou Bluetooth), phase **calibrage** :
+
+1. **Re-sonde** avec le protocole déjà identifié (`refineDiscoveredTv`) — nom et port réels.
+2. **Vérification joignabilité** (`isWifiCandidateReachable` / connexion GATT).
+3. **À l’ajout** (« Ajouter à ma télécommande ») : second calibrage avant création du `Device`.
+
+Sondes Wi‑Fi **ordonnées** par IP (Roku → Samsung → LG → Sony → Philips) pour limiter les erreurs de type. Samsung : corps de réponse doit mentionner Tizen/Samsung (pas un simple HTTP 401 générique).
+
+Fichier : `deviceCalibration.ts`.
+
 ---
 
 ## Scan Bluetooth : uniquement des TV ?

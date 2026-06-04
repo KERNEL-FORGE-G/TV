@@ -79,7 +79,7 @@ export async function isBlePeripheralReachable(
     if (typeof peripheral.rssi === 'number' && peripheral.rssi < BLE_SCAN_RSSI_MIN) {
       return false;
     }
-    return true;
+    return checkConnect(peripheral.id);
   }
 
   return checkConnect(peripheral.id);

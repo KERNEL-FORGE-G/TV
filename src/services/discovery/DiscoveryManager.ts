@@ -1,6 +1,7 @@
 import type { DiscoveryCandidate, TransportRoute } from '../../core/remoteTypes';
 import { discoverTvsOnNetwork } from '../NetworkDiscoveryService';
 import { resolveSubnetPrefixes } from '../../utils/network';
+import { calibrateDiscoveryCandidates } from './deviceCalibration';
 import {
   createThrottledScanProgress,
   isScanAborted,
@@ -85,6 +86,25 @@ export async function scanDiscoveryCandidates(
     if (waitUntilScanDeadline(startMs, signal)) break;
 
     await sleepScan(2500, signal);
+  }
+
+  if (candidates.length > 0 && !isScanAborted(signal)) {
+    reportScanProgress(startMs, emitProgress, 'calibrage');
+    const calibrated = await calibrateDiscoveryCandidates(
+      candidates,
+      signal,
+      (done, total) => {
+        const sec = Math.floor((Date.now() - startMs) / 1000);
+        emitProgress({
+          elapsedMs: Date.now() - startMs,
+          totalMs: SCAN_DURATION_MS,
+          pct: 95,
+          label: `${sec}s / 45s · calibrage (${done}/${total})`,
+        });
+      },
+    );
+    reportScanProgress(startMs, emitProgress);
+    return calibrated;
   }
 
   reportScanProgress(startMs, emitProgress);

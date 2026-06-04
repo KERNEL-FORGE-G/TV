@@ -92,13 +92,20 @@ export async function probeLg(
       },
       timeoutMs,
     );
+    const raw = await res.text().catch(() => '');
     if (res.ok || res.status === 401) {
-      const data = await res.json().catch(() => null);
+      let data: { payload?: Record<string, string> } | null = null;
+      try {
+        data = raw ? JSON.parse(raw) : null;
+      } catch {
+        data = null;
+      }
       const product =
         data?.payload?.productName ??
         data?.payload?.modelName ??
         data?.payload?.friendlyName;
       if (product) return `LG ${product}`;
+      if (/webos|LG/i.test(raw)) return 'LG webOS TV';
     }
   } catch {
     /* ignore */

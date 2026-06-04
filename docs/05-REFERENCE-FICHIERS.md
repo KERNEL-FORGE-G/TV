@@ -246,6 +246,7 @@ Chaque entrée : **rôle** et **liens** dans l’architecture. Les chemins sont 
 | `DiscoveryManager.ts` | Orchestration scan Wi‑Fi 45 s |
 | `BluetoothDiscoveryService.ts` | Scan BLE 45 s, appairés |
 | `scanSession.ts` | Constante durée, `AbortSignal`, progression |
+| `deviceCalibration.ts` | Re-sonde plateforme, calibrage candidats après scan / à l’adoption |
 | `availability.ts` | Filtre appareils joignables |
 
 ---
