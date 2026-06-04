@@ -1,6 +1,6 @@
 # Découverte et scan d’appareils
 
-Comment l’app détecte les appareils, ce qui apparaît dans la liste, et comment le scan de **45 secondes** est conçu pour rester stable sur mobile.
+Comment l’app détecte les appareils, ce qui apparaît dans la liste, et comment le scan de **15 secondes** est conçu pour rester stable sur mobile.
 
 ---
 
@@ -11,7 +11,7 @@ Comment l’app détecte les appareils, ce qui apparaît dans la liste, et comme
 | **Appareils** → section Détection | Wi‑Fi ou Bluetooth (chips), bouton scan, **Arrêter le scan** |
 | **Assistant première config** (étape Réseau) | Wi‑Fi uniquement, **Passer le scan réseau** possible |
 
-Durée : **`SCAN_DURATION_MS = 45_000`** (`scanSession.ts`). Arrêt manuel via `AbortController`.
+Durée : **`SCAN_DURATION_MS = 15_000`** (`scanSession.ts`). Arrêt manuel via `AbortController`.
 
 ---
 
@@ -43,7 +43,7 @@ Pas de scan générique Android TV / Fire TV / Apple TV sans API implémentée (
 
 **Contournement :** ajout manuel (modale Appareils) ou TV **infrarouge** (IR + codes Pronto).
 
-### Fenêtre 45 s
+### Fenêtre 15 s
 
 - Jusqu’à **2 balayages complets** du sous-réseau (`SCAN_MAX_FULL_PASSES`), avec **2,5 s** entre les passes.
 - **Parallélisme** : 14 IP en même temps (pas 56 — évite crash / OOM vers ~25 s).
@@ -113,7 +113,7 @@ Si l’app se ferme encore : arrêter le scan, vérifier le préfixe réseau, re
 
 ```mermaid
 flowchart TD
-  A[Lancer scan 45s] --> B[Vagues sur 192.168.1.x]
+  A[Lancer scan 15s] --> B[Vagues sur 192.168.1.x]
   B --> C{Sondes TV par IP}
   C -->|Réponse| D[Candidat dans la liste]
   C -->|Non| E[IP ignorée]

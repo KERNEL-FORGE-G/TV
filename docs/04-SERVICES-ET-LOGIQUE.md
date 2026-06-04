@@ -88,12 +88,12 @@ IDs d’applications pour raccourcis streaming Roku.
 
 ### `DiscoveryManager.ts`
 
-- `scanDiscoveryCandidates(subnet, options)` — fenêtre **45 s**, max **2 passes** /24, throttle UI.
+- `scanDiscoveryCandidates(subnet, options)` — fenêtre **15 s**, max **2 passes** /24, throttle UI.
 - `adoptCandidate(candidate, roomId?)` → `Partial<Device>` pour `addDevice`.
 
 ### `scanSession.ts`
 
-- `SCAN_DURATION_MS = 45_000`, `SCAN_MAX_FULL_PASSES = 2`
+- `SCAN_DURATION_MS = 15_000`, `SCAN_MAX_FULL_PASSES = 2`
 - `createThrottledScanProgress`, `sleepScan`, `DiscoveryScanOptions`
 
 **Guide utilisateur détaillé :** [07-DECOUVERTE-SCAN.md](./07-DECOUVERTE-SCAN.md) (Wi‑Fi = TV connues uniquement, BT ≠ TV seulement, crash ~25 s).
@@ -108,7 +108,7 @@ IDs d’applications pour raccourcis streaming Roku.
 
 1. Permissions + `BleManager.start`
 2. `getBondedPeripherals`
-3. Scan BLE jusqu’à fin des 45 s (`scanNearbyBle` + abort → `stopScan`)
+3. Scan BLE jusqu’à fin des 15 s (`scanNearbyBle` + abort → `stopScan`)
 4. Vérification par lots de 4 (`isBlePeripheralReachable`)
 
 ### `ble/bleManagerBridge.ts`

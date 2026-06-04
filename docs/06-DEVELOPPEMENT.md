@@ -142,7 +142,7 @@ npm run verify
 | Scan BT vide | Appairer dans réglages Android, BT activé |
 | IR ne part pas | Pas d’émetteur ou code Pronto invalide — Réglages |
 | LG / Samsung refuse | Ouvrir `PairingModal`, compléter appairage |
-| Liste scan lente | Normal jusqu’à 45 s ; arrêt manuel possible |
+| Liste scan lente | Normal jusqu’à 15 s ; arrêt manuel possible |
 
 ---
 

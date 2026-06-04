@@ -189,7 +189,7 @@ Chaque entrée : **rôle** et **liens** dans l’architecture. Les chemins sont 
 
 | Fichier | Rôle |
 |---------|------|
-| `ProximitySolarScan.tsx` | UI scan orbite + liste + arrêt 45 s |
+| `ProximitySolarScan.tsx` | UI scan orbite + liste + arrêt 15 s |
 
 ---
 
@@ -243,8 +243,8 @@ Chaque entrée : **rôle** et **liens** dans l’architecture. Les chemins sont 
 
 | Fichier | Rôle |
 |---------|------|
-| `DiscoveryManager.ts` | Orchestration scan Wi‑Fi 45 s |
-| `BluetoothDiscoveryService.ts` | Scan BLE 45 s, appairés |
+| `DiscoveryManager.ts` | Orchestration scan Wi‑Fi 15 s |
+| `BluetoothDiscoveryService.ts` | Scan BLE 15 s, appairés |
 | `scanSession.ts` | Constante durée, `AbortSignal`, progression |
 | `deviceCalibration.ts` | Re-sonde plateforme, calibrage candidats après scan / à l’adoption |
 | `availability.ts` | Filtre appareils joignables |

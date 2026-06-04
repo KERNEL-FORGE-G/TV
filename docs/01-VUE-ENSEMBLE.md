@@ -111,9 +111,9 @@ Quand l’utilisateur appuie sur une touche (ex. `vol_up`) :
    - `Bluetooth` → `BLUETOOTH` → **`BluetoothService`** (souvent limité selon appareil).
 4. Résultat journalisé via **`logCommand`**, retour haptique si activé.
 
-## Découverte réseau (45 secondes)
+## Découverte réseau (15 secondes)
 
-- Durée fixe **`SCAN_DURATION_MS = 45_000`** (`scanSession.ts`).
+- Durée fixe **`SCAN_DURATION_MS = 15_000`** (`scanSession.ts`).
 - **Wi‑Fi** : passes répétées de sondes sur le sous-réseau /24 (Roku, Samsung, LG, Sony, Philips en parallèle par IP).
 - **Bluetooth** : liste des appairés + scan BLE jusqu’à la fin du créneau, puis filtre **joignabilité** (`availability.ts`).
 - **Arrêt** : `AbortController` + bouton « Arrêter le scan » ; `stopScan()` côté BLE.

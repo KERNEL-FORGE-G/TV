@@ -1,5 +1,5 @@
 /** Durée maximale d’un scan découverte (Wi‑Fi ou Bluetooth). */
-export const SCAN_DURATION_MS = 45_000;
+export const SCAN_DURATION_MS = 15_000;
 
 export const SCAN_DURATION_SEC = SCAN_DURATION_MS / 1000;
 
@@ -89,5 +89,5 @@ export async function sleepScan(
   });
 }
 
-/** Nombre max de balayages /24 complets sur la fenêtre 45 s (évite crash ~25 s). */
-export const SCAN_MAX_FULL_PASSES = 2;
+/** Une seule passe /24 sur 15 s (limite charge réseau et crashs). */
+export const SCAN_MAX_FULL_PASSES = 1;

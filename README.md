@@ -47,7 +47,7 @@ telecommande/
 
 1. **Télécommande** — touches, pad, volume, favoris, clavier texte (Roku).
 2. **Scènes** — enchaînements de commandes.
-3. **Appareils** — scan Wi‑Fi / Bluetooth (45 s, arrêt possible).
+3. **Appareils** — scan Wi‑Fi / Bluetooth (15 s, arrêt possible).
 4. **Réglages** — permissions, IR, codes Pronto, export/import, journal.
 
 Projet privé (`package.json` → `private: true`).

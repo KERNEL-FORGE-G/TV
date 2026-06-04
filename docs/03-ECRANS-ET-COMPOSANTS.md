@@ -28,7 +28,7 @@ Navigation : **4 onglets** + **assistant initial** + **modales**. Thème central
 Assistant en **4 étapes** (`STEPS`) :
 
 1. **Matériel** — détection émetteur IR (`getIrHardwareStatus`).
-2. **Réseau** — scan **45 s** optionnel ; **Passer le scan réseau** termine l’assistant sans TV ; lien vers configuration IR manuelle.
+2. **Réseau** — scan **15 s** optionnel ; **Passer le scan réseau** termine l’assistant sans TV ; lien vers configuration IR manuelle.
 3. **Première TV** — marque IR (`IR_BRAND_DATABASE`) ou passage direct à l’app.
 4. **Terminé** — `setOnboardingComplete(true)`, callback `onDone`.
 
@@ -103,7 +103,7 @@ onScan, onStopScan?, onAdopt, onDismiss
 - Visualisation **orbite** (planètes = candidats, centre = téléphone).
 - Liste sous le graphique avec badge **Ajouté**.
 - Carte détail : adopter ou retirer (`dismissed`).
-- Pendant scan : compteur `Xs / 45s`, bouton **Arrêter le scan**.
+- Pendant scan : compteur `Xs / 15s`, bouton **Arrêter le scan**.
 
 ---
 
@@ -196,7 +196,7 @@ sequenceDiagram
   participant R as RemoteScreen
   participant IR as useIR
 
-  U->>D: Scanner Wi-Fi 45s
+  U->>D: Scanner Wi-Fi 15s
   D->>S: setDiscoveryCandidates
   U->>D: Ajouter TV
   D->>S: addDevice

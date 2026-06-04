@@ -8,6 +8,7 @@ import {
   normalizeScanOptions,
   reportScanProgress,
   SCAN_DURATION_MS,
+  SCAN_DURATION_SEC,
   SCAN_MAX_FULL_PASSES,
   sleepScan,
   waitUntilScanDeadline,
@@ -68,7 +69,7 @@ export async function scanDiscoveryCandidates(
             elapsedMs: Date.now() - startMs,
             totalMs: SCAN_DURATION_MS,
             pct: Math.min(99, Math.round((scanned / total) * 100)),
-            label: `${sec}s / 45s · ${prefix}.x (${scanned}/${total})`,
+            label: `${sec}s / ${SCAN_DURATION_SEC}s · ${prefix}.x (${scanned}/${total})`,
           });
         },
         signal,
@@ -99,7 +100,7 @@ export async function scanDiscoveryCandidates(
           elapsedMs: Date.now() - startMs,
           totalMs: SCAN_DURATION_MS,
           pct: 95,
-          label: `${sec}s / 45s · calibrage (${done}/${total})`,
+          label: `${sec}s / ${SCAN_DURATION_SEC}s · calibrage (${done}/${total})`,
         });
       },
     );

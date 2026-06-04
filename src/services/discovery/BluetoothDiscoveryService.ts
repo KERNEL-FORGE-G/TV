@@ -90,7 +90,7 @@ async function scanNearbyBle(
   return Array.from(discovered.values());
 }
 
-/** Appareils appairés + scan BLE jusqu’à 45 s (annulable). */
+/** Appareils appairés + scan BLE jusqu’à 15 s (annulable). */
 export async function scanBluetoothCandidates(
   options?: DiscoveryScanOptions | ((pct: number) => void),
 ): Promise<DiscoveryCandidate[]> {

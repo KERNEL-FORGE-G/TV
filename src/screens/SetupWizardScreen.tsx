@@ -81,7 +81,7 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
     scanAbortRef.current = controller;
 
     setScanning(true);
-    setScanProgress('0s / 45s');
+    setScanProgress('0s / 15s');
     try {
       const candidates = await scanDiscoveryCandidates(subnet, {
         signal: controller.signal,
@@ -251,7 +251,7 @@ export const SetupWizardScreen: React.FC<{ onDone: () => void }> = ({ onDone }) 
             </>
           ) : (
             <TouchableOpacity style={styles.btn} onPress={scanNetwork}>
-              <Text style={styles.btnText}>Scanner le réseau (45 s)</Text>
+              <Text style={styles.btnText}>Scanner le réseau (15 s)</Text>
             </TouchableOpacity>
           )}
 

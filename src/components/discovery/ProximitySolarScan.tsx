@@ -172,8 +172,8 @@ export const ProximitySolarScan: React.FC<ProximitySolarScanProps> = ({
     <View style={styles.wrap}>
       <Text style={[styles.sectionSub, styles.sectionSubFirst]}>
         {isWifi
-          ? 'Scan Wi‑Fi jusqu’à 45 s : les TV trouvées s’ajoutent à la liste. Vous pouvez arrêter avant la fin.'
-          : 'Scan Bluetooth jusqu’à 45 s : appareils appairés ou détectés. Arrêt possible à tout moment.'}
+          ? 'Scan Wi‑Fi jusqu’à 15 s : les TV trouvées s’ajoutent à la liste. Vous pouvez arrêter avant la fin.'
+          : 'Scan Bluetooth jusqu’à 15 s : appareils appairés ou détectés. Arrêt possible à tout moment.'}
       </Text>
 
       <View style={styles.modeRow}>
@@ -435,7 +435,7 @@ export const ProximitySolarScan: React.FC<ProximitySolarScanProps> = ({
         ) : (
           <TouchableOpacity style={styles.scanBtn} onPress={onScan}>
             <Text style={styles.scanBtnText}>
-              {isWifi ? 'Scanner le Wi‑Fi (45 s)' : 'Scanner le Bluetooth (45 s)'}
+              {isWifi ? 'Scanner le Wi‑Fi (15 s)' : 'Scanner le Bluetooth (15 s)'}
             </Text>
           </TouchableOpacity>
         )}

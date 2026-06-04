@@ -104,7 +104,7 @@ export const DevicesScreen: React.FC = () => {
     const { signal } = controller;
 
     setScanning(true);
-    setScanProgress('0s / 45s');
+    setScanProgress('0s / 15s');
     let aborted = false;
 
     try {
@@ -131,7 +131,7 @@ export const DevicesScreen: React.FC = () => {
         if (!aborted && scanMountedRef.current && found.length === 0) {
           Alert.alert(
             'Aucun appareil',
-            `Aucune TV détectée sur ${subnet}.x en 45 s.\n\n• Même Wi‑Fi que la TV\n• Télécommande réseau activée sur la TV\n• Corrigez le préfixe si besoin (ex. 192.168.0)\n\nRelancez le scan ou arrêtez-le plus tôt si besoin.`,
+            `Aucune TV détectée sur ${subnet}.x en 15 s.\n\n• Même Wi‑Fi que la TV\n• Télécommande réseau activée sur la TV\n• Corrigez le préfixe si besoin (ex. 192.168.0)\n\nRelancez le scan ou arrêtez-le plus tôt si besoin.`,
           );
         }
       } else {
@@ -156,7 +156,7 @@ export const DevicesScreen: React.FC = () => {
         if (!aborted && scanMountedRef.current && found.length === 0) {
           Alert.alert(
             'Aucun appareil Bluetooth',
-            'Aucun appareil appairé ou détecté en 45 s.\n\n• Activez le Bluetooth sur ce téléphone\n• Appairez la TV depuis le menu Bluetooth Android\n• Revenez ici et relancez le scan\n\nVous pouvez arrêter le scan à tout moment.',
+            'Aucun appareil appairé ou détecté en 15 s.\n\n• Activez le Bluetooth sur ce téléphone\n• Appairez la TV depuis le menu Bluetooth Android\n• Revenez ici et relancez le scan\n\nVous pouvez arrêter le scan à tout moment.',
           );
         }
       }
